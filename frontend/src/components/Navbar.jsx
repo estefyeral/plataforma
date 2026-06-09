@@ -9,7 +9,12 @@ export default function Navbar() {
         <Link to="/usuarios" style={estilos.link}>Usuarios</Link>
         <Link to="/clientes" style={estilos.link}>Clientes</Link>
         <Link to="/facturas" style={estilos.link}>Facturas</Link>
-        <Link to="/login" style={estilos.link}>Salir</Link>
+        <Link to="/proveedores" style={estilos.link}>Proveedores</Link>
+        <Link to="/empleados" style={estilos.link}>Empleados</Link>
+        <Link to="/compras" style={estilos.link}>Compras</Link>
+        <Link to="/alertas" style={estilos.link}>Alertas</Link>
+        <Link to="/caja" style={estilos.link}>Caja Diaria</Link>
+        <Link to="/" style={estilos.link}>Salir</Link>
       </div>
     </nav>
   );

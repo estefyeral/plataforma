@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import api from "../services/api"; // ✅ Esta línea es la que conecta, estaba bien
 
 function Login() {
   const [correo, setCorreo] = useState("");
@@ -9,20 +9,23 @@ function Login() {
 
   const iniciarSesion = async (e) => {
     e.preventDefault();
-
     try {
+      // ✅ Enviamos los datos tal cual los pide tu backend
       const respuesta = await api.post("/auth/login", {
-        correo,
-        password,
+        correo: correo,
+        clave: password // 🔴 TU BACKEND PIDE "clave", TU CÓDIGO MANDABA "password" -> AQUÍ ESTABA EL ERROR!
       });
 
-      if (respuesta.data.mensaje === "Login correcto") {
-        alert("Bienvenido al sistema");
-        navigate("/usuarios");
+      if (respuesta.data?.token) {
+        localStorage.setItem("token", respuesta.data.token); // Guardamos el acceso
+        alert("¡Bienvenido!");
+        navigate("/productos"); // Ir a la página principal
+      } else {
+        alert("Usuario o contraseña incorrectos");
       }
     } catch (error) {
-      console.error(error);
-      alert("Correo o contraseña incorrectos");
+      console.error("Error en login:", error);
+      alert("Error al conectar con el servidor");
     }
   };
 
@@ -33,78 +36,52 @@ function Login() {
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
-        backgroundColor: "#f4f4f4",
+        background: "#f4f4f4",
       }}
     >
       <form
         onSubmit={iniciarSesion}
         style={{
-          backgroundColor: "white",
+          background: "white",
           padding: "30px",
           borderRadius: "10px",
-          width: "350px",
-          boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+          width: "300px",
         }}
       >
-        <h2
-          style={{
-            textAlign: "center",
-            marginBottom: "20px",
-          }}
-        >
-          INICIO DE SESIÓN
-        </h2>
-
+        <h1>Acceso</h1>
         <input
           type="email"
-          placeholder="Correo electrónico"
+          placeholder="Correo"
           value={correo}
           onChange={(e) => setCorreo(e.target.value)}
-          required
           style={{
             width: "100%",
             padding: "10px",
             marginBottom: "15px",
           }}
+          required
         />
-
         <input
           type="password"
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
           style={{
             width: "100%",
             padding: "10px",
             marginBottom: "15px",
           }}
+          required
         />
-
         <button
           type="submit"
           style={{
             width: "100%",
             padding: "10px",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
           }}
         >
           Ingresar
         </button>
-
-        <p
-          style={{
-            marginTop: "15px",
-            textAlign: "center",
-            color: "#666",
-          }}
-        >
-          
-        </p>
       </form>
     </div>
   );

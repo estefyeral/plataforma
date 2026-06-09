@@ -1,9 +1,8 @@
 import { useState } from "react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 
 function Productos() {
   const [productos, setProductos] = useState([]);
+
   const [codigo, setCodigo] = useState("");
   const [nombre, setNombre] = useState("");
   const [marca, setMarca] = useState("");
@@ -12,7 +11,6 @@ function Productos() {
   const [fechaVencimiento, setFechaVencimiento] = useState("");
   const [imagen, setImagen] = useState("");
 
-  // ✅ Estados nuevos para EDITAR
   const [editandoId, setEditandoId] = useState(null);
   const [codigoEdit, setCodigoEdit] = useState("");
   const [nombreEdit, setNombreEdit] = useState("");
@@ -22,15 +20,9 @@ function Productos() {
   const [fechaVencimientoEdit, setFechaVencimientoEdit] = useState("");
   const [imagenEdit, setImagenEdit] = useState("");
 
-  // AGREGAR PRODUCTO
   const agregarProducto = () => {
     if (
-      codigo === "" ||
-      nombre === "" ||
-      marca === "" ||
-      precioVenta === "" ||
-      stock === "" ||
-      fechaVencimiento === ""
+      !codigo || !nombre || !marca || !precioVenta || !stock || !fechaVencimiento
     ) {
       alert("Todos los campos son obligatorios");
       return;
@@ -49,7 +41,6 @@ function Productos() {
 
     setProductos([...productos, nuevoProducto]);
 
-    // LIMPIAR CAMPOS
     setCodigo("");
     setNombre("");
     setMarca("");
@@ -59,15 +50,10 @@ function Productos() {
     setImagen("");
   };
 
-  // ELIMINAR PRODUCTO
   const eliminarProducto = (id) => {
-    const nuevosProductos = productos.filter(
-      (producto) => producto.id_producto !== id
-    );
-    setProductos(nuevosProductos);
+    setProductos(productos.filter(p => p.id_producto !== id));
   };
 
-  // ✅ FUNCIÓN NUEVA: Preparar edición
   const iniciarEdicion = (producto) => {
     setEditandoId(producto.id_producto);
     setCodigoEdit(producto.codigo);
@@ -79,188 +65,167 @@ function Productos() {
     setImagenEdit(producto.imagen || "");
   };
 
-  // ✅ FUNCIÓN NUEVA: Guardar cambios editados
   const guardarEdicion = () => {
-    if (
-      codigoEdit === "" || nombreEdit === "" || marcaEdit === "" ||
-      precioVentaEdit === "" || stockEdit === "" || fechaVencimientoEdit === ""
-    ) {
-      alert("Todos los campos son obligatorios");
-      return;
-    }
-    const actualizados = productos.map(prod => {
-      if(prod.id_producto === editandoId){
-        return {
-          ...prod,
-          codigo: codigoEdit,
-          nombre: nombreEdit,
-          marca: marcaEdit,
-          precio_venta: precioVentaEdit,
-          stock: stockEdit,
-          fecha_vencimiento: fechaVencimientoEdit,
-          imagen: imagenEdit
-        };
-      }
-      return prod;
-    });
+    const actualizados = productos.map(prod =>
+      prod.id_producto === editandoId
+        ? {
+            ...prod,
+            codigo: codigoEdit,
+            nombre: nombreEdit,
+            marca: marcaEdit,
+            precio_venta: precioVentaEdit,
+            stock: stockEdit,
+            fecha_vencimiento: fechaVencimientoEdit,
+            imagen: imagenEdit,
+          }
+        : prod
+    );
+
     setProductos(actualizados);
-    setEditandoId(null); // Salir del modo edición
+    setEditandoId(null);
+  };
+
+  const inputStyle = {
+    width: "100%",
+    padding: "8px",
+    marginBottom: "6px",
+    borderRadius: "5px",
+    border: "1px solid #ccc"
   };
 
   return (
-    <>
-      <Navbar />
-      <div
-        style={{
-          padding: "20px",
-          maxWidth: "700px",
-          margin: "0 auto",
-        }}
-      >
-        <h1
-          style={{
-            textAlign: "center",
-            marginBottom: "20px",
-            fontSize: "35px",
-          }}
-        >
-          REGISTRO DE PRODUCTOS
-        </h1>
+    <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>
 
-        {/* CAMPOS DE FORMULARIO */}
-        <input
-          type="text"
-          placeholder="Código"
-          value={codigo}
-          onChange={(e) => setCodigo(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-        />
-        <input
-          type="text"
-          placeholder="Nombre"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-        />
-        <input
-          type="text"
-          placeholder="Marca"
-          value={marca}
-          onChange={(e) => setMarca(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-        />
-        <input
-          type="number"
-          placeholder="Precio de venta"
-          value={precioVenta}
-          onChange={(e) => setPrecioVenta(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-        />
-        <input
-          type="number"
-          placeholder="Stock"
-          value={stock}
-          onChange={(e) => setStock(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-        />
-        <input
-          type="date"
-          value={fechaVencimiento}
-          onChange={(e) => setFechaVencimiento(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-        />
-        <input
-          type="text"
-          placeholder="URL de imagen"
-          value={imagen}
-          onChange={(e) => setImagen(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-        />
+      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>
+        REGISTRO DE PRODUCTOS
+      </h1>
+
+      {/* FORMULARIO */}
+      <div style={{
+        background: "#f4f4f4",
+        padding: "15px",
+        borderRadius: "10px",
+        marginBottom: "20px"
+      }}>
+        <h3>Nuevo Producto</h3>
+
+        <input style={inputStyle} placeholder="Código" value={codigo} onChange={e => setCodigo(e.target.value)} />
+        <input style={inputStyle} placeholder="Nombre" value={nombre} onChange={e => setNombre(e.target.value)} />
+        <input style={inputStyle} placeholder="Marca" value={marca} onChange={e => setMarca(e.target.value)} />
+        <input style={inputStyle} type="number" placeholder="Precio venta" value={precioVenta} onChange={e => setPrecioVenta(e.target.value)} />
+        <input style={inputStyle} type="number" placeholder="Stock" value={stock} onChange={e => setStock(e.target.value)} />
+        <input style={inputStyle} type="date" value={fechaVencimiento} onChange={e => setFechaVencimiento(e.target.value)} />
+        <input style={inputStyle} placeholder="Imagen URL" value={imagen} onChange={e => setImagen(e.target.value)} />
 
         <button
           onClick={agregarProducto}
-          style={{ padding: "10px 20px", cursor: "pointer" }}
+          style={{
+            background: "green",
+            color: "white",
+            padding: "10px",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer"
+          }}
         >
           Registrar Producto
         </button>
-
-        {/* ✅ FORMULARIO DE EDICIÓN - APARECE AL EDITAR */}
-        {editandoId && (
-          <div style={{border:"1px solid blue", padding:"15px", margin:"20px 0", borderRadius:"5px"}}>
-            <h3 style={{marginTop:0}}>Editar Producto</h3>
-            <input type="text" placeholder="Código" value={codigoEdit} onChange={(e)=>setCodigoEdit(e.target.value)} style={{width:"100%", padding:"10px", marginBottom:"10px"}} />
-            <input type="text" placeholder="Nombre" value={nombreEdit} onChange={(e)=>setNombreEdit(e.target.value)} style={{width:"100%", padding:"10px", marginBottom:"10px"}} />
-            <input type="text" placeholder="Marca" value={marcaEdit} onChange={(e)=>setMarcaEdit(e.target.value)} style={{width:"100%", padding:"10px", marginBottom:"10px"}} />
-            <input type="number" placeholder="Precio de venta" value={precioVentaEdit} onChange={(e)=>setPrecioVentaEdit(e.target.value)} style={{width:"100%", padding:"10px", marginBottom:"10px"}} />
-            <input type="number" placeholder="Stock" value={stockEdit} onChange={(e)=>setStockEdit(e.target.value)} style={{width:"100%", padding:"10px", marginBottom:"10px"}} />
-            <input type="date" value={fechaVencimientoEdit} onChange={(e)=>setFechaVencimientoEdit(e.target.value)} style={{width:"100%", padding:"10px", marginBottom:"10px"}} />
-            <input type="text" placeholder="URL de imagen" value={imagenEdit} onChange={(e)=>setImagenEdit(e.target.value)} style={{width:"100%", padding:"10px", marginBottom:"10px"}} />
-            <button onClick={guardarEdicion} style={{padding:"8px 15px", background:"green", color:"white", border:"none", marginRight:"10px", cursor:"pointer"}}>Guardar Cambios</button>
-            <button onClick={() => setEditandoId(null)} style={{padding:"8px 15px", background:"gray", color:"white", border:"none", cursor:"pointer"}}>Cancelar</button>
-          </div>
-        )}
-
-        <hr />
-        <h2>PRODUCTOS REGISTRADOS</h2>
-
-        {productos.length === 0 ? (
-          <p>No hay productos registrados</p>
-        ) : (
-          productos.map((producto) => (
-            <div
-              key={producto.id_producto}
-              style={{
-                border: "1px solid #ccc",
-                padding: "15px",
-                marginBottom: "10px",
-                borderRadius: "5px",
-              }}
-            >
-              <p><strong>Código:</strong> {producto.codigo}</p>
-              <p><strong>Nombre:</strong> {producto.nombre}</p>
-              <p><strong>Marca:</strong> {producto.marca}</p>
-              <p><strong>Precio venta:</strong> ${producto.precio_venta}</p>
-              <p><strong>Stock:</strong> {producto.stock}</p>
-              <p><strong>Fecha vencimiento:</strong> {producto.fecha_vencimiento}</p>
-              {producto.imagen && (
-                <img
-                  src={producto.imagen}
-                  alt={producto.nombre}
-                  style={{ width: "100px", height: "100px", objectFit: "cover" }}
-                />
-              )}
-              <button
-                onClick={() => eliminarProducto(producto.id_producto)}
-                style={{
-                  background: "red",
-                  color: "white",
-                  border: "none",
-                  padding: "8px",
-                  cursor: "pointer",
-                  marginRight: "8px"
-                }}
-              >
-                Eliminar
-              </button>
-              {/* ✅ BOTÓN EDITAR NUEVO */}
-              <button
-                onClick={() => iniciarEdicion(producto)}
-                style={{
-                  background: "orange",
-                  color: "white",
-                  border: "none",
-                  padding: "8px",
-                  cursor: "pointer",
-                }}
-              >
-                Editar
-              </button>
-            </div>
-          ))
-        )}
       </div>
-      <Footer />
-    </>
+
+      {/* EDICIÓN */}
+      {editandoId && (
+        <div style={{
+          border: "2px solid blue",
+          padding: "15px",
+          borderRadius: "10px",
+          marginBottom: "20px",
+          background: "#eef5ff"
+        }}>
+          <h3>Editar Producto</h3>
+
+          <input style={inputStyle} value={codigoEdit} onChange={e => setCodigoEdit(e.target.value)} />
+          <input style={inputStyle} value={nombreEdit} onChange={e => setNombreEdit(e.target.value)} />
+          <input style={inputStyle} value={marcaEdit} onChange={e => setMarcaEdit(e.target.value)} />
+          <input style={inputStyle} value={precioVentaEdit} onChange={e => setPrecioVentaEdit(e.target.value)} />
+          <input style={inputStyle} value={stockEdit} onChange={e => setStockEdit(e.target.value)} />
+          <input style={inputStyle} type="date" value={fechaVencimientoEdit} onChange={e => setFechaVencimientoEdit(e.target.value)} />
+          <input style={inputStyle} value={imagenEdit} onChange={e => setImagenEdit(e.target.value)} />
+
+          <button
+            onClick={guardarEdicion}
+            style={{ background: "green", color: "white", padding: "8px", marginRight: "10px" }}
+          >
+            Guardar
+          </button>
+
+          <button
+            onClick={() => setEditandoId(null)}
+            style={{ background: "gray", color: "white", padding: "8px" }}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+
+      {/* RESULTADOS EN CASILLAS */}
+      <h2>PRODUCTOS REGISTRADOS</h2>
+
+      {productos.map(producto => (
+        <div
+          key={producto.id_producto}
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "10px",
+            padding: "15px",
+            marginBottom: "15px",
+            background: "white"
+          }}
+        >
+
+          <input style={inputStyle} value={producto.codigo} disabled />
+          <input style={inputStyle} value={producto.nombre} disabled />
+          <input style={inputStyle} value={producto.marca} disabled />
+          <input style={inputStyle} value={producto.precio_venta} disabled />
+          <input style={inputStyle} value={producto.stock} disabled />
+          <input style={inputStyle} value={producto.fecha_vencimiento} disabled />
+
+          {producto.imagen && (
+            <input style={inputStyle} value={producto.imagen} disabled />
+          )}
+
+          <button
+            onClick={() => eliminarProducto(producto.id_producto)}
+            style={{
+              background: "red",
+              color: "white",
+              padding: "8px",
+              marginRight: "8px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer"
+            }}
+          >
+            Eliminar
+          </button>
+
+          <button
+            onClick={() => iniciarEdicion(producto)}
+            style={{
+              background: "orange",
+              color: "white",
+              padding: "8px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer"
+            }}
+          >
+            Editar
+          </button>
+
+        </div>
+      ))}
+
+    </div>
   );
 }
 

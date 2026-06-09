@@ -1,23 +1,38 @@
-import axios from 'axios';
+import axios from "axios";
 
-// 🔗 Tu backend está aquí:
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: "http://localhost:3000/api",
 });
 
-// Interceptor (opcional, útil para futuro login)
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
+// ================= USUARIOS =================
+export const obtenerUsuarios = () => api.get("/usuarios");
+
+export const crearUsuario = (datos) =>
+  api.post("/usuarios", datos);
+
+export const eliminarUsuario = (id) =>
+  api.delete(`/usuarios/${id}`);
+
+export const actualizarUsuario = (id, datos) =>
+  api.put(`/usuarios/${id}`, datos);
+
+
+// ================= CLIENTES =================
+export const obtenerClientes = () => api.get("/clientes");
+
+export const crearCliente = (datos) =>
+  api.post("/clientes", datos);
+
+export const eliminarCliente = (id) =>
+  api.delete(`/clientes/${id}`);
+
+export const actualizarCliente = (id, datos) =>
+  api.put(`/clientes/${id}`, datos);
+
+export const obtenerCliente = (id) =>
+  api.get(`/clientes/${id}`);
+
+
+// ============================================
 export default api;
