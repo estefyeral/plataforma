@@ -1,6 +1,29 @@
-const modelo = require('../models/detallecompras');
-exports.listar = async (req, res) => { try { res.json(await modelo.obtenerTodos()) } catch (e) { res.status(500).json({error:e.message}) } };
-exports.uno = async (req, res) => { try { res.json(await modelo.obtenerPorId(req.params.id)) } catch (e) { res.status(500).json({error:e.message}) } };
-exports.crear = async (req, res) => { try { res.json(await modelo.crear(req.body)) } catch (e) { res.status(500).json({error:e.message}) } };
-exports.actualizar = async (req, res) => { try { res.json(await modelo.actualizar(req.params.id, req.body)) } catch (e) { res.status(500).json({error:e.message}) } };
-exports.eliminar = async (req, res) => { try { await modelo.eliminar(req.params.id); res.json({mensaje:'Eliminado'}) } catch (e) { res.status(500).json({error:e.message}) } };
+const modelo = require("../models/detallecompras");
+
+// ==========================
+// OBTENER DETALLE DE UNA COMPRA
+// ==========================
+
+const obtenerDetalleCompra = async (req, res) => {
+
+  try {
+
+    const datos = await modelo.obtenerPorCompra(req.params.id);
+
+    res.json(datos);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      error: error.message
+    });
+
+  }
+
+};
+
+module.exports = {
+  obtenerDetalleCompra
+};

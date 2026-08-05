@@ -1,14 +1,25 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-// ✅ LLAMA AL ARCHIVO CORRECTO (PLURAL)
-const controlador = require('../controllers/proveedores');
+const controlador = require("../controllers/proveedores");
 
-// ✅ NOMBRES EXACTOS DE LAS FUNCIONES
-router.get('/', controlador.listar);
-router.get('/:id', controlador.uno);
-router.post('/', controlador.crear);
-router.put('/:id', controlador.actualizar);
-router.delete('/:id', controlador.eliminar);
+// ==========================
+// RUTAS
+// ==========================
+
+// Obtener todos los proveedores
+router.get("/", controlador.listarProveedores);
+
+// Obtener un proveedor por ID
+router.get("/:id", controlador.obtenerProveedor);
+
+// Crear proveedor
+router.post("/", controlador.crearProveedor);
+
+// Actualizar proveedor
+router.put("/:id", controlador.actualizarProveedor);
+
+// Eliminar proveedor
+router.delete("/:id", controlador.eliminarProveedor);
 
 module.exports = router;

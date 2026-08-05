@@ -1,230 +1,223 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  obtenerProductos,
+  crearProducto,
+  actualizarProducto,
+  eliminarProducto
+} from "../services/api";
 
 function Productos() {
   const [productos, setProductos] = useState([]);
+  const [buscar, setBuscar] = useState("");
+  const [form, setForm] = useState({
+    id_producto: null,
+    codigo: "",
+    nombre: "",
+    marca: "",
+    precio_venta: "",
+    stock: "",
+    fecha_vencimiento: "",
+    imagen: ""
+  });
+  const [editando, setEditando] = useState(false);
 
-  const [codigo, setCodigo] = useState("");
-  const [nombre, setNombre] = useState("");
-  const [marca, setMarca] = useState("");
-  const [precioVenta, setPrecioVenta] = useState("");
-  const [stock, setStock] = useState("");
-  const [fechaVencimiento, setFechaVencimiento] = useState("");
-  const [imagen, setImagen] = useState("");
-
-  const [editandoId, setEditandoId] = useState(null);
-  const [codigoEdit, setCodigoEdit] = useState("");
-  const [nombreEdit, setNombreEdit] = useState("");
-  const [marcaEdit, setMarcaEdit] = useState("");
-  const [precioVentaEdit, setPrecioVentaEdit] = useState("");
-  const [stockEdit, setStockEdit] = useState("");
-  const [fechaVencimientoEdit, setFechaVencimientoEdit] = useState("");
-  const [imagenEdit, setImagenEdit] = useState("");
-
-  const agregarProducto = () => {
-    if (
-      !codigo || !nombre || !marca || !precioVenta || !stock || !fechaVencimiento
-    ) {
-      alert("Todos los campos son obligatorios");
-      return;
+  // ================= CARGAR =================
+  const cargar = async () => {
+    try {
+      const res = await obtenerProductos();
+      setProductos(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      console.error("Error cargando productos:", error);
     }
-
-    const nuevoProducto = {
-      id_producto: Date.now(),
-      codigo,
-      nombre,
-      marca,
-      precio_venta: precioVenta,
-      stock,
-      fecha_vencimiento: fechaVencimiento,
-      imagen,
-    };
-
-    setProductos([...productos, nuevoProducto]);
-
-    setCodigo("");
-    setNombre("");
-    setMarca("");
-    setPrecioVenta("");
-    setStock("");
-    setFechaVencimiento("");
-    setImagen("");
   };
 
-  const eliminarProducto = (id) => {
-    setProductos(productos.filter(p => p.id_producto !== id));
+  useEffect(() => {
+    cargar();
+  }, []);
+
+  // ================= LIMPIAR =================
+  const limpiar = () => {
+    setForm({
+      id_producto: null,
+      codigo: "",
+      nombre: "",
+      marca: "",
+      precio_venta: "",
+      stock: "",
+      fecha_vencimiento: "",
+      imagen: ""
+    });
+    setEditando(false);
   };
 
-  const iniciarEdicion = (producto) => {
-    setEditandoId(producto.id_producto);
-    setCodigoEdit(producto.codigo);
-    setNombreEdit(producto.nombre);
-    setMarcaEdit(producto.marca);
-    setPrecioVentaEdit(producto.precio_venta);
-    setStockEdit(producto.stock);
-    setFechaVencimientoEdit(producto.fecha_vencimiento);
-    setImagenEdit(producto.imagen || "");
+  // ================= GUARDAR =================
+  const guardar = async (e) => {
+    e.preventDefault();
+    try {
+      if (editando) {
+        await actualizarProducto(form.id_producto, form);
+      } else {
+        await crearProducto(form);
+      }
+      limpiar();
+      cargar();
+    } catch (error) {
+      console.error("Error guardando producto:", error);
+    }
   };
 
-  const guardarEdicion = () => {
-    const actualizados = productos.map(prod =>
-      prod.id_producto === editandoId
-        ? {
-            ...prod,
-            codigo: codigoEdit,
-            nombre: nombreEdit,
-            marca: marcaEdit,
-            precio_venta: precioVentaEdit,
-            stock: stockEdit,
-            fecha_vencimiento: fechaVencimientoEdit,
-            imagen: imagenEdit,
-          }
-        : prod
+  // ================= EDITAR =================
+  const editar = (producto) => {
+    setForm({
+      ...producto,
+      fecha_vencimiento: producto.fecha_vencimiento
+        ? producto.fecha_vencimiento.substring(0, 10)
+        : ""
+    });
+    setEditando(true);
+  };
+
+  // ================= ELIMINAR =================
+  const eliminar = async (id) => {
+    if (!window.confirm("¿Desea eliminar este producto?")) return;
+    try {
+      await eliminarProducto(id);
+      cargar();
+    } catch (error) {
+      console.error("Error eliminando producto:", error);
+    }
+  };
+
+  // ================= FILTRO =================
+  const productosFiltrados = productos.filter((p) => {
+    const texto = (buscar || "").toLowerCase();
+    return (
+      (p.codigo || "").toLowerCase().includes(texto) ||
+      (p.nombre || "").toLowerCase().includes(texto) ||
+      (p.marca || "").toLowerCase().includes(texto) ||
+      String(p.stock || "").includes(texto) ||
+      String(p.precio_venta || "").includes(texto)
     );
+  });
 
-    setProductos(actualizados);
-    setEditandoId(null);
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "8px",
-    marginBottom: "6px",
-    borderRadius: "5px",
-    border: "1px solid #ccc"
+  // ================= DIAS PARA VENCER =================
+  const diasParaVencer = (fecha) => {
+    if (!fecha) return null;
+    const hoy = new Date();
+    const vencimiento = new Date(fecha);
+    const diferencia = vencimiento - hoy;
+    return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>
+    <div style={{ padding: "20px" }}>
+      <h1>Productos</h1>
 
-      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>
-        REGISTRO DE PRODUCTOS
-      </h1>
+      {/* BUSCADOR */}
+      <input
+        placeholder="🔎 Buscar productos..."
+        value={buscar}
+        onChange={(e) => setBuscar(e.target.value)}
+        style={{ padding: "8px", width: "300px", marginBottom: "10px" }}
+      />
 
       {/* FORMULARIO */}
-      <div style={{
-        background: "#f4f4f4",
-        padding: "15px",
-        borderRadius: "10px",
-        marginBottom: "20px"
-      }}>
-        <h3>Nuevo Producto</h3>
+      <form onSubmit={guardar} style={{ marginBottom: "20px" }}>
+        <input
+          placeholder="Código"
+          value={form.codigo}
+          onChange={(e) => setForm({ ...form, codigo: e.target.value })}
+        />
+        <input
+          placeholder="Nombre"
+          value={form.nombre}
+          onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+        />
+        <input
+          placeholder="Marca"
+          value={form.marca}
+          onChange={(e) => setForm({ ...form, marca: e.target.value })}
+        />
+        <input
+          type="number"
+          placeholder="Precio"
+          value={form.precio_venta}
+          onChange={(e) => setForm({ ...form, precio_venta: e.target.value })}
+        />
+        <input
+          type="number"
+          placeholder="Stock"
+          value={form.stock}
+          onChange={(e) => setForm({ ...form, stock: e.target.value })}
+        />
+        <input
+          type="date"
+          value={form.fecha_vencimiento}
+          onChange={(e) =>
+            setForm({ ...form, fecha_vencimiento: e.target.value })
+          }
+        />
+        <input
+          placeholder="Imagen"
+          value={form.imagen}
+          onChange={(e) => setForm({ ...form, imagen: e.target.value })}
+        />
 
-        <input style={inputStyle} placeholder="Código" value={codigo} onChange={e => setCodigo(e.target.value)} />
-        <input style={inputStyle} placeholder="Nombre" value={nombre} onChange={e => setNombre(e.target.value)} />
-        <input style={inputStyle} placeholder="Marca" value={marca} onChange={e => setMarca(e.target.value)} />
-        <input style={inputStyle} type="number" placeholder="Precio venta" value={precioVenta} onChange={e => setPrecioVenta(e.target.value)} />
-        <input style={inputStyle} type="number" placeholder="Stock" value={stock} onChange={e => setStock(e.target.value)} />
-        <input style={inputStyle} type="date" value={fechaVencimiento} onChange={e => setFechaVencimiento(e.target.value)} />
-        <input style={inputStyle} placeholder="Imagen URL" value={imagen} onChange={e => setImagen(e.target.value)} />
-
-        <button
-          onClick={agregarProducto}
-          style={{
-            background: "green",
-            color: "white",
-            padding: "10px",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer"
-          }}
-        >
-          Registrar Producto
+        <button type="submit">
+          {editando ? "Actualizar" : "Guardar"}
         </button>
-      </div>
-
-      {/* EDICIÓN */}
-      {editandoId && (
-        <div style={{
-          border: "2px solid blue",
-          padding: "15px",
-          borderRadius: "10px",
-          marginBottom: "20px",
-          background: "#eef5ff"
-        }}>
-          <h3>Editar Producto</h3>
-
-          <input style={inputStyle} value={codigoEdit} onChange={e => setCodigoEdit(e.target.value)} />
-          <input style={inputStyle} value={nombreEdit} onChange={e => setNombreEdit(e.target.value)} />
-          <input style={inputStyle} value={marcaEdit} onChange={e => setMarcaEdit(e.target.value)} />
-          <input style={inputStyle} value={precioVentaEdit} onChange={e => setPrecioVentaEdit(e.target.value)} />
-          <input style={inputStyle} value={stockEdit} onChange={e => setStockEdit(e.target.value)} />
-          <input style={inputStyle} type="date" value={fechaVencimientoEdit} onChange={e => setFechaVencimientoEdit(e.target.value)} />
-          <input style={inputStyle} value={imagenEdit} onChange={e => setImagenEdit(e.target.value)} />
-
-          <button
-            onClick={guardarEdicion}
-            style={{ background: "green", color: "white", padding: "8px", marginRight: "10px" }}
-          >
-            Guardar
-          </button>
-
-          <button
-            onClick={() => setEditandoId(null)}
-            style={{ background: "gray", color: "white", padding: "8px" }}
-          >
+        {editando && (
+          <button type="button" onClick={limpiar}>
             Cancelar
           </button>
-        </div>
+        )}
+      </form>
+
+      {/* LISTA */}
+      {productosFiltrados.length > 0 ? (
+        productosFiltrados.map((p) => {
+          const dias = diasParaVencer(p.fecha_vencimiento);
+          return (
+            <div
+              key={p.id_producto}
+              style={{
+                border: "1px solid #ccc",
+                margin: "10px",
+                padding: "10px"
+              }}
+            >
+              <p><strong>{p.nombre}</strong></p>
+              <p>Marca: {p.marca}</p>
+              <p>Precio: {p.precio_venta}</p>
+              <p>Stock: {p.stock}</p>
+              <p>
+                {p.fecha_vencimiento
+                  ? new Date(p.fecha_vencimiento).toLocaleDateString()
+                  : "Sin fecha"}
+              </p>
+
+              {/* ALERTA DE VENCIMIENTO */}
+              {dias !== null && (
+                <p
+                  style={{
+                    color: dias <= 5 ? "red" : dias <= 10 ? "orange" : "green",
+                    fontWeight: "bold"
+                  }}
+                >
+                  {dias < 0
+                    ? "⚠️ Producto vencido"
+                    : `⏳ Vence en ${dias} días`}
+                </p>
+              )}
+
+              <button onClick={() => editar(p)}>Editar</button>
+              <button onClick={() => eliminar(p.id_producto)}>Eliminar</button>
+            </div>
+          );
+        })
+      ) : (
+        <p>No hay productos registrados</p>
       )}
-
-      {/* RESULTADOS EN CASILLAS */}
-      <h2>PRODUCTOS REGISTRADOS</h2>
-
-      {productos.map(producto => (
-        <div
-          key={producto.id_producto}
-          style={{
-            border: "1px solid #ccc",
-            borderRadius: "10px",
-            padding: "15px",
-            marginBottom: "15px",
-            background: "white"
-          }}
-        >
-
-          <input style={inputStyle} value={producto.codigo} disabled />
-          <input style={inputStyle} value={producto.nombre} disabled />
-          <input style={inputStyle} value={producto.marca} disabled />
-          <input style={inputStyle} value={producto.precio_venta} disabled />
-          <input style={inputStyle} value={producto.stock} disabled />
-          <input style={inputStyle} value={producto.fecha_vencimiento} disabled />
-
-          {producto.imagen && (
-            <input style={inputStyle} value={producto.imagen} disabled />
-          )}
-
-          <button
-            onClick={() => eliminarProducto(producto.id_producto)}
-            style={{
-              background: "red",
-              color: "white",
-              padding: "8px",
-              marginRight: "8px",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer"
-            }}
-          >
-            Eliminar
-          </button>
-
-          <button
-            onClick={() => iniciarEdicion(producto)}
-            style={{
-              background: "orange",
-              color: "white",
-              padding: "8px",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer"
-            }}
-          >
-            Editar
-          </button>
-
-        </div>
-      ))}
-
     </div>
   );
 }

@@ -1,7 +1,29 @@
-const pool = require('../config/db');
-const obtenerTodos = async () => { const [res] = await pool.query('SELECT * FROM detalle_compras'); return res; };
-const obtenerPorId = async (id) => { const [res] = await pool.query('SELECT * FROM detalle_compras WHERE id_detalle_compra = ?', [id]); return res[0]; };
-const crear = async (datos) => { const { id_compra, id_producto, cantidad, precio } = datos; const [res] = await pool.query('INSERT INTO detalle_compras (id_compra, id_producto, cantidad, precio) VALUES (?, ?, ?, ?)', [id_compra, id_producto, cantidad, precio]); return { id: res.insertId, ...datos }; };
-const actualizar = async (id, datos) => { const { id_compra, id_producto, cantidad, precio } = datos; await pool.query('UPDATE detalle_compras SET id_compra=?, id_producto=?, cantidad=?, precio=? WHERE id_detalle_compra=?', [id_compra, id_producto, cantidad, precio, id]); return {id, ...datos}; };
-const eliminar = async (id) => { await pool.query('DELETE FROM detalle_compras WHERE id_detalle_compra = ?', [id]); return true; };
-module.exports = { obtenerTodos, obtenerPorId, crear, actualizar, eliminar };
+const pool = require("../config/db");
+
+const obtenerPorCompra = async (id_compra) => {
+
+  console.log(">>> Ejecutando consulta de detalle_compra");
+
+  const sql = `
+    SELECT
+      dc.id_detalle_compra,
+      p.nombre,
+      dc.cantidad,
+      dc.precio,
+      dc.subtotal
+    FROM detalle_compra dc
+    INNER JOIN productos p
+      ON p.id_producto = dc.id_producto
+    WHERE dc.id_compra = ?
+  `;
+
+  console.log(sql);
+
+  const [rows] = await pool.query(sql, [id_compra]);
+
+  return rows;
+};
+
+module.exports = {
+  obtenerPorCompra
+};

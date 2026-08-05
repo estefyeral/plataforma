@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api"; // ✅ Esta línea es la que conecta, estaba bien
+import api from "../services/api";
 
 function Login() {
   const [correo, setCorreo] = useState("");
@@ -9,17 +9,21 @@ function Login() {
 
   const iniciarSesion = async (e) => {
     e.preventDefault();
+
     try {
-      // ✅ Enviamos los datos tal cual los pide tu backend
       const respuesta = await api.post("/auth/login", {
-        correo: correo,
-        clave: password // 🔴 TU BACKEND PIDE "clave", TU CÓDIGO MANDABA "password" -> AQUÍ ESTABA EL ERROR!
+        correo,
+        clave: password,
       });
 
       if (respuesta.data?.token) {
-        localStorage.setItem("token", respuesta.data.token); // Guardamos el acceso
+        localStorage.setItem("token", respuesta.data.token);
+        localStorage.setItem(
+          "usuario",
+          JSON.stringify(respuesta.data.usuario)
+          );
         alert("¡Bienvenido!");
-        navigate("/productos"); // Ir a la página principal
+        navigate("/productos");
       } else {
         alert("Usuario o contraseña incorrectos");
       }
@@ -45,39 +49,52 @@ function Login() {
           background: "white",
           padding: "30px",
           borderRadius: "10px",
-          width: "300px",
+          width: "320px",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
         }}
       >
-        <h1>Acceso</h1>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+          Iniciar Sesión
+        </h2>
+
         <input
           type="email"
           placeholder="Correo"
           value={correo}
           onChange={(e) => setCorreo(e.target.value)}
+          required
           style={{
             width: "100%",
             padding: "10px",
             marginBottom: "15px",
+            boxSizing: "border-box",
           }}
-          required
         />
+
         <input
           type="password"
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
           style={{
             width: "100%",
             padding: "10px",
-            marginBottom: "15px",
+            marginBottom: "20px",
+            boxSizing: "border-box",
           }}
-          required
         />
+
         <button
           type="submit"
           style={{
             width: "100%",
             padding: "10px",
+            backgroundColor: "#1e293b",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
+            borderRadius: "5px",
           }}
         >
           Ingresar

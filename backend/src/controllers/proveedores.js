@@ -1,47 +1,99 @@
-// ✅ LLAMA AL MODELO (PLURAL)
-const modelo = require('../models/proveedores');
+const modelo = require("../models/proveedores");
 
-exports.listar = async (req, res) => {
+// ==========================
+// LISTAR PROVEEDORES
+// ==========================
+
+const listarProveedores = async (req, res) => {
   try {
     const datos = await modelo.obtenerTodos();
     res.json(datos);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
-exports.uno = async (req, res) => {
+// ==========================
+// OBTENER PROVEEDOR
+// ==========================
+
+const obtenerProveedor = async (req, res) => {
   try {
     const dato = await modelo.obtenerPorId(req.params.id);
     res.json(dato);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
-exports.crear = async (req, res) => {
+// ==========================
+// CREAR PROVEEDOR
+// ==========================
+
+const crearProveedor = async (req, res) => {
   try {
-    const nuevo = await modelo.crear(req.body);
-    res.json(nuevo);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+    const id = await modelo.crear(req.body);
+
+    res.json({
+      mensaje: "Proveedor creado correctamente",
+      id_proveedor: id
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
-exports.actualizar = async (req, res) => {
+// ==========================
+// ACTUALIZAR PROVEEDOR
+// ==========================
+
+const actualizarProveedor = async (req, res) => {
   try {
-    const editado = await modelo.actualizar(req.params.id, req.body);
-    res.json(editado);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+
+    await modelo.actualizar(req.params.id, req.body);
+
+    res.json({
+      mensaje: "Proveedor actualizado correctamente"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
-exports.eliminar = async (req, res) => {
+// ==========================
+// ELIMINAR PROVEEDOR
+// ==========================
+
+const eliminarProveedor = async (req, res) => {
   try {
+
     await modelo.eliminar(req.params.id);
-    res.json({ mensaje: 'Eliminado correctamente' });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+
+    res.json({
+      mensaje: "Proveedor eliminado correctamente"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
   }
+};
+
+module.exports = {
+  listarProveedores,
+  obtenerProveedor,
+  crearProveedor,
+  actualizarProveedor,
+  eliminarProveedor
 };

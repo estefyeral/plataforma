@@ -1,36 +1,73 @@
-const pool = require('../config/db');
+const pool = require("../config/db");
 
-const obtenerTodos = async () => {
-  const [res] = await pool.query('SELECT * FROM detalle_factura');
-  return res;
-};
-
-const obtenerPorId = async (id) => {
-  const [res] = await pool.query('SELECT * FROM detalle_factura WHERE id_detalle = ?', [id]);
-  return res[0];
-};
+// ===================================
+// GUARDAR DETALLE DE FACTURA
+// ===================================
 
 const crear = async (datos) => {
-  const { id_factura, id_producto, cantidad, precio, subtotal } = datos;
-  const [res] = await pool.query(
-    'INSERT INTO detalle_factura (id_factura, id_producto, cantidad, precio, subtotal) VALUES (?, ?, ?, ?, ?)',
-    [id_factura, id_producto, cantidad, precio, subtotal]
+
+  const {
+    id_factura,
+    id_producto,
+    cantidad,
+    precio,
+    subtotal
+  } = datos;
+
+  const [resultado] = await pool.query(
+
+    `INSERT INTO detalle_factura
+    (
+      id_factura,
+      id_producto,
+      cantidad,
+      precio,
+      subtotal
+    )
+    VALUES (?,?,?,?,?)`,
+
+    [
+      id_factura,
+      id_producto,
+      cantidad,
+      precio,
+      subtotal
+    ]
+
   );
-  return { id: res.insertId, ...datos };
+
+  return resultado.insertId;
+
 };
 
-const actualizar = async (id, datos) => {
-  const { id_factura, id_producto, cantidad, precio, subtotal } = datos;
-  await pool.query(
-    'UPDATE detalle_factura SET id_factura=?, id_producto=?, cantidad=?, precio=?, subtotal=? WHERE id_detalle=?',
-    [id_factura, id_producto, cantidad, precio, subtotal, id]
+// ===================================
+// OBTENER DETALLE DE UNA FACTURA
+// ===================================
+
+const obtenerPorFactura = async (id_factura) => {
+
+  const [rows] = await pool.query(
+
+    `SELECT
+      d.id_detalle_factura,
+      p.nombre,
+      d.cantidad,
+      d.precio,
+      d.subtotal
+     FROM detalle_factura d
+     INNER JOIN productos p
+        ON p.id_producto = d.id_producto
+     WHERE d.id_factura = ?`,
+
+    [id_factura]
+
   );
-  return { id, ...datos };
+
+  return rows;
+
 };
 
-const eliminar = async (id) => {
-  await pool.query('DELETE FROM detalle_factura WHERE id_detalle = ?', [id]);
-  return true;
+module.exports = {
+  crear,
+  obtenerPorFactura
 };
-
-module.exports = { obtenerTodos, obtenerPorId, crear, actualizar, eliminar };

@@ -1,36 +1,122 @@
-const pool = require('../config/db');
+const pool = require("../config/db");
+
+// ==========================
+// OBTENER TODOS
+// ==========================
 
 const obtenerTodos = async () => {
-  const [res] = await pool.query('SELECT * FROM proveedores');
-  return res;
+
+  const [rows] = await pool.query(
+    "SELECT * FROM proveedores ORDER BY id_proveedor DESC"
+  );
+
+  return rows;
+
 };
+
+// ==========================
+// OBTENER UNO
+// ==========================
 
 const obtenerPorId = async (id) => {
-  const [res] = await pool.query('SELECT * FROM proveedores WHERE id_proveedor = ?', [id]);
-  return res[0];
+
+  const [rows] = await pool.query(
+    "SELECT * FROM proveedores WHERE id_proveedor = ?",
+    [id]
+  );
+
+  return rows[0];
+
 };
+
+// ==========================
+// CREAR
+// ==========================
 
 const crear = async (datos) => {
-  const { nombre, telefono, direccion, correo } = datos;
-  const [res] = await pool.query(
-    'INSERT INTO proveedores (nombre, telefono, direccion, correo) VALUES (?, ?, ?, ?)',
-    [nombre, telefono, direccion, correo]
+
+  const {
+    nombre,
+    telefono,
+    direccion
+  } = datos;
+
+  const [resultado] = await pool.query(
+
+    `INSERT INTO proveedores
+    (
+      nombre,
+      telefono,
+      direccion
+    )
+    VALUES
+    (
+      ?,
+      ?,
+      ?
+    )`,
+
+    [
+      nombre,
+      telefono,
+      direccion
+    ]
+
   );
-  return { id: res.insertId, ...datos };
+
+  return resultado.insertId;
+
 };
+
+// ==========================
+// ACTUALIZAR
+// ==========================
 
 const actualizar = async (id, datos) => {
-  const { nombre, telefono, direccion, correo } = datos;
+
+  const {
+    nombre,
+    telefono,
+    direccion
+  } = datos;
+
   await pool.query(
-    'UPDATE proveedores SET nombre=?, telefono=?, direccion=?, correo=? WHERE id_proveedor=?',
-    [nombre, telefono, direccion, correo, id]
+
+    `UPDATE proveedores
+     SET
+       nombre = ?,
+       telefono = ?,
+       direccion = ?
+     WHERE id_proveedor = ?`,
+
+    [
+      nombre,
+      telefono,
+      direccion,
+      id
+    ]
+
   );
-  return { id, ...datos };
+
 };
+
+// ==========================
+// ELIMINAR
+// ==========================
 
 const eliminar = async (id) => {
-  await pool.query('DELETE FROM proveedores WHERE id_proveedor = ?', [id]);
-  return true;
+
+  await pool.query(
+    "DELETE FROM proveedores WHERE id_proveedor = ?",
+    [id]
+  );
+
 };
 
-module.exports = { obtenerTodos, obtenerPorId, crear, actualizar, eliminar };
+module.exports = {
+  obtenerTodos,
+  obtenerPorId,
+  crear,
+  actualizar,
+  eliminar
+};

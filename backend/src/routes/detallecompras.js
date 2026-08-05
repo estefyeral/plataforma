@@ -1,9 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const controlador = require('../controllers/detallecompras');
-router.get('/', controlador.listar);
-router.get('/:id', controlador.uno);
-router.post('/', controlador.crear);
-router.put('/:id', controlador.actualizar);
-router.delete('/:id', controlador.eliminar);
+
+const controlador = require("../controllers/detallecompras");
+
+// ==========================
+// OBTENER DETALLE DE UNA COMPRA
+// ==========================
+
+router.get("/:id", controlador.obtenerDetalleCompra);
+
 module.exports = router;
